@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2566">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px 'Helvetica Neue'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px 'Helvetica Neue'; min-height: 15.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!doctype html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="utf-8" /&gt;</p>
+<p class="p1">&lt;meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" /&gt;</p>
+<p class="p1">&lt;title&gt;Real-time Eye Anonymiser&lt;/title&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>body { margin:0; font-family:system-ui, sans-serif; background:#0b0f14; color:#eaf2ff; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>header { padding:12px 16px; font-weight:600; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>main { display:flex; flex-direction:column; gap:12px; padding:0 12px 16px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>.video-wrap { position:relative; width:100%; max-width:720px; margin:0 auto; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>video, canvas { width:100%; border-radius:12px; background:#000; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>#overlay { position:absolute; inset:0; pointer-events:none; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>.controls { display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>button { padding:10px 14px; border-radius:10px; border:1px solid #2a3a4d; background:#142132; color:#eaf2ff; font-weight:600; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>button:disabled { opacity:.5; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>label { color:#9bb0c9; font-size:14px; margin:0 4px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>select, input[type=number] { padding:6px; border-radius:6px; border:1px solid #2a3a4d; background:#0f1722; color:#eaf2ff; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>.row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>.hint { color:#9bb0c9; font-size:13px; text-align:center; flex-basis:100%; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>.timer { font-weight:700; color:#6ec1ff; }</p>
+<p class="p1">&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1">&lt;header&gt;👁️‍🗨️ Eye Anonymiser — Black Box / Blur&lt;/header&gt;</p>
+<p class="p1">&lt;main&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="video-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;video id="raw" playsinline muted style="display:none"&gt;&lt;/video&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;canvas id="out"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;canvas id="overlay" style="display:none;"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="controls"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label&gt;Mode:&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;select id="mode"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;option value="black" selected&gt;Black Box&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;option value="blur"&gt;Blur&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label&gt;Resolution:&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;select id="resolution"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;option value="1920x1080"&gt;1080p&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;option value="1280x720" selected&gt;720p&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label&gt;FPS:&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;select id="fps"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;option value="30" selected&gt;30&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;option value="24"&gt;24&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label&gt;Duration(s):&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input id="duration" type="number" value="120" min="10" max="600"/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button id="startBtn"&gt;Start&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button id="stopBtn" disabled&gt;Stop&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label&gt;&lt;input id="showOverlay" type="checkbox"&gt; Debug overlay&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="hint"&gt;Anonymisation is done in-browser, nothing uploaded.&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="timer" id="timer"&gt;00:00&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/main&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;!-- TFJS + FaceMesh --&gt;</p>
+<p class="p1">&lt;script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.20.0/dist/tf-core.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.20.0/dist/tf-backend-webgl.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.20.0/dist/tf-converter.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection@2.0.1/dist/face-landmarks-detection.min.js"&gt;&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1">(async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const els = {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>raw: raw, out: out, overlay: overlay,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>start: startBtn, stop: stopBtn, mode: mode,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>res: resolution, fps: fps, dur: duration,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>show: showOverlay, timer: timer</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>await tf.setBackend('webgl');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const model = await faceLandmarksDetection.load(</p>
+<p class="p1"><span class="Apple-converted-space">    </span>faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ maxFaces: 1 }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const LEFT = [33,7,163,144,145,153,154,155,133,173,157,158,159,160,161,246];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const RIGHT= [263,249,390,373,374,380,381,382,362,398,384,385,386,387,388,466];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>let stream, rec, chunks=[], raf, startTime, stopId;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const off = document.createElement('canvas'); const offCtx=off.getContext('2d');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function eyeBox(pts, padX=10, padY=8) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let xs=pts.map(p=&gt;p.x), ys=pts.map(p=&gt;p.y);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return [Math.min(...xs)-padX, Math.min(...ys)-padY,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Math.max(...xs)-Math.min(...xs)+2*padX,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Math.max(...ys)-Math.min(...ys)+2*padY];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function drawMask(ctx, mode, pts) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(!pts.length) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const [x,y,w,h]=eyeBox(pts);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(mode==='black'){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.fillStyle='#000'; ctx.fillRect(x,y,w,h);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} else if(mode==='blur'){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>off.width=w; off.height=h;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>offCtx.clearRect(0,0,w,h);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>offCtx.drawImage(ctx.canvas, x,y,w,h, 0,0,w,h);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.save(); ctx.filter='blur(12px)';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.drawImage(off, x,y,w,h,h);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ctx.restore();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function startCam() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const [w,h]=els.res.value.split('x').map(Number);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>stream = await navigator.mediaDevices.getUserMedia({</p>
+<p class="p1"><span class="Apple-converted-space">      </span>video:{width:{ideal:w},height:{ideal:h},facingMode:{exact:"environment"}},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>audio:false</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}).catch(()=&gt;navigator.mediaDevices.getUserMedia({video:{width:w,height:h},audio:false}));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>els.raw.srcObject=stream; await els.raw.play();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>els.out.width=els.raw.videoWidth; els.out.height=els.raw.videoHeight;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>els.overlay.width=els.out.width; els.overlay.height=els.out.height;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return {w:els.out.width,h:els.out.height,fps:+els.fps.value};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function save() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const blob=new Blob(chunks,{type:rec.mimeType}); const url=URL.createObjectURL(blob);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const a=document.createElement('a'); a.href=url; a.download=`anonymised_${Date.now()}.webm`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>a.click(); setTimeout(()=&gt;URL.revokeObjectURL(url),200);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function stopAll(){ cancelAnimationFrame(raf); clearTimeout(stopId);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(rec &amp;&amp; rec.state!=='inactive') rec.stop(); els.start.disabled=false; els.stop.disabled=true; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function loop(ctx,w,h) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>raf=requestAnimationFrame(()=&gt;loop(ctx,w,h));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>ctx.drawImage(els.raw,0,0,w,h);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const faces=await model.estimateFaces({input:els.raw});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(faces.length){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const k=faces[0].keypoints; const m=els.mode.value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>drawMask(ctx,m,LEFT.map(i=&gt;k[i])); drawMask(ctx,m,RIGHT.map(i=&gt;k[i]));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const s=Math.floor((performance.now()-startTime)/1000);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>els.timer.textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>els.start.onclick=async()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>els.start.disabled=true; els.stop.disabled=false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const {w,h,fps}=await startCam(); const ctx=els.out.getContext('2d');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>rec=new MediaRecorder(els.out.captureStream(fps),{mimeType:'video/webm'});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>chunks=[]; rec.ondataavailable=e=&gt;e.data.size&amp;&amp;chunks.push(e.data); rec.onstop=save;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>rec.start(1000); startTime=performance.now();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>loop(ctx,w,h); stopId=setTimeout(stopAll,els.dur.value*1000);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>els.stop.onclick=stopAll;</p>
+<p class="p1">})();</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
